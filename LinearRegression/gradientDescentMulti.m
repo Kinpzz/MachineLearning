@@ -18,7 +18,7 @@ for iter = 1:num_iters
     
     dec = alpha*(1/m)*(X*theta-y)'*X;
     theta(1) = theta(1) - dec(1)';
-    theta(2:length(theta)) = theta(2:length(theta)).*(1-lambda) - dec(2:length(dec))';
+    theta(2:length(theta)) = theta(2:length(theta)).*(1-alpha*lambda*(1/m)) - dec(2:length(dec))';
     % ============================================================
 
     % Save the cost J in every iteration    

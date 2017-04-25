@@ -50,25 +50,39 @@ X = [ones(m, 1) X];
 fprintf('Running gradient descent ...\n');
 
 % Choose some alpha value
-alpha = 0.01;
-num_iters = 1000;
+alpha = 0.03;
+num_iters = 500;
 lambda = 0;
+indices =  crossvalind('Kfold', y, 10);
+inside_RMSE = 0;
+outside_RMSE = 0;
+for lambda = 0:0.0000001:0.0000002
+    %% ten-fold validation
+    for i = 1:10
+        test = (indices == i);
+        train = ~test;
+        train_set_x = X(train,:);
+        train_set_y = y(train,:);
+        test_set_x = X(test,:);
+        test_set_y = y(test,:);
+        % Init Theta and Run Gradient Descent 
+        theta = zeros(size(X,2), 1);
+        [theta, J_history] = gradientDescentMulti(train_set_x, train_set_y, theta, alpha, lambda, num_iters);
+        inside_RMSE = inside_RMSE + sqrt(mean((train_set_x*theta - train_set_y).^2));
+        outside_RMSE = outside_RMSE + sqrt(mean((test_set_x*theta - test_set_y).^2));
+        % Plot the convergence graph
+        %figure;
+        %plot(1:numel(J_history), J_history, '-b', 'LineWidth', 2);
+        %xlabel('Number of iterations');
+        %ylabel('Cost J');
+        % Display gradient descent's result
 
-% Init Theta and Run Gradient Descent 
-theta = zeros(size(X,2), 1);
-[theta, J_history] = gradientDescentMulti(X, y, theta, alpha, lambda, num_iters);
-
-RMSE = sqrt(mean((X*theta-y).^2));
-
-% Plot the convergence graph
-figure;
-plot(1:numel(J_history), J_history, '-b', 'LineWidth', 2);
-xlabel('Number of iterations');
-ylabel('Cost J');
-
-% Display gradient descent's result
-fprintf('RMSE: %f\n', RMSE);
-
+    end
+    inside_RMSE = inside_RMSE / 10;
+    outside_RMSE = outside_RMSE / 10;
+    fprintf('inside RMSE: %.5f \n', inside_RMSE);
+    fprintf('outside RMSE: %.5f \n', outside_RMSE);
+end
 %% predict data
 fprintf('Loading test set ...\n');
 pred_data = csvread('save_test.csv',1,1);
